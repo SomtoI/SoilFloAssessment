@@ -1,0 +1,19 @@
+
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Environment
+.env
+
+# Database
+*.db
+*.db-journal
+
+# Coverage
+coverage/
+
+# Misc
+.DS_Store

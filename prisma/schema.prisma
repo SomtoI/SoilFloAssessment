@@ -1,0 +1,47 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Site {
+  id          Int      @id
+  name        String
+  address     String
+  description String
+  trucks      Truck[]
+  tickets     Ticket[]
+
+  @@map("sites")
+}
+
+model Truck {
+  id      Int      @id
+  license String
+  siteId  Int
+  site    Site     @relation(fields: [siteId], references: [id])
+  tickets Ticket[]
+
+  @@index([siteId])
+  @@map("trucks")
+}
+
+model Ticket {
+  id           Int      @id @default(autoincrement())
+  ticketNumber Int
+  material     String   @default("Soil")
+  dispatchedAt DateTime
+  truckId      Int
+  siteId       Int
+  truck        Truck    @relation(fields: [truckId], references: [id])
+  site         Site     @relation(fields: [siteId], references: [id])
+
+  @@unique([truckId, dispatchedAt])
+  @@unique([siteId, ticketNumber])
+  @@index([dispatchedAt])
+  @@index([siteId, dispatchedAt])
+  @@map("tickets")
+}
