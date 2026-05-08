@@ -1,6 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsDateString, IsInt, IsOptional, IsPositive, Max, Min } from 'class-validator';
+import { IsDateString, IsInt, IsOptional, Max, Min } from 'class-validator';
 
 export class GetTicketsQueryDto {
   @ApiPropertyOptional({
@@ -36,14 +36,13 @@ export class GetTicketsQueryDto {
   @ApiPropertyOptional({ description: 'Page number (1-indexed)', default: 1, minimum: 1 })
   @IsOptional()
   @IsInt()
-  @IsPositive()
   @Min(1)
   page?: number = 1;
 
-  @ApiPropertyOptional({ description: 'Results per page', default: 50, maximum: 100 })
+  @ApiPropertyOptional({ description: 'Results per page', default: 50, minimum: 1, maximum: 100 })
   @IsOptional()
   @IsInt()
-  @IsPositive()
+  @Min(1)
   @Max(100)
   limit?: number = 50;
 }

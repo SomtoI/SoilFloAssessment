@@ -5,12 +5,6 @@ import { PrismaService } from '../../prisma/prisma.service';
 export class TrucksService {
   constructor(private readonly prisma: PrismaService) {}
 
-  findAll() {
-    return this.prisma.truck.findMany({
-      select: { id: true, license: true, siteId: true },
-    });
-  }
-
   async findOne(id: number) {
     const truck = await this.prisma.truck.findUnique({
       where: { id },

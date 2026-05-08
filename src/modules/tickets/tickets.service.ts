@@ -1,10 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  ConflictException,
-  UnprocessableEntityException,
-  Logger,
-} from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, UnprocessableEntityException, Logger } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateTicketsBulkDto } from './dto/create-tickets-bulk.dto';
 import { GetTicketsQueryDto } from './dto/get-tickets-query.dto';
@@ -37,21 +31,18 @@ export class TicketsService {
     this.validateNoFutureDates(dispatchTimes, cutoff);
     this.validateNoDuplicatesInBatch(dispatchTimes);
 
-    // Everything validated — write atomically.
     const created = await this.prisma.$transaction(async (tx) => {
       await this.assertNoConflictsWithExisting(tx, dto.truckId, dispatchTimes);
 
       const nextTicketNumber = await this.getNextTicketNumber(tx, truck.siteId);
 
-      const ticketData: Prisma.TicketCreateManyInput[] = dispatchTimes.map(
-        (dispatchedAt, index) => ({
-          truckId: dto.truckId,
-          siteId: truck.siteId,
-          dispatchedAt,
-          ticketNumber: nextTicketNumber + index,
-          material: 'Soil',
-        }),
-      );
+      const ticketData: Prisma.TicketCreateManyInput[] = dto.tickets.map((ticket, index) => ({
+        truckId: dto.truckId,
+        siteId: truck.siteId,
+        dispatchedAt: dispatchTimes[index],
+        ticketNumber: nextTicketNumber + index,
+        material: ticket.material,
+      }));
 
       await tx.ticket.createMany({ data: ticketData });
 
@@ -73,9 +64,7 @@ export class TicketsService {
       tickets: created.map(this.toResponseShape),
     };
 
-    this.logger.log(
-      `Truck ${dto.truckId} dispatched ${response.created} ticket(s) for site ${truck.siteId}`,
-    );
+    this.logger.log(`Truck ${dto.truckId} dispatched ${response.created} ticket(s) for site ${truck.siteId}`);
 
     return response;
   }
@@ -140,19 +129,13 @@ export class TicketsService {
     for (const t of times) {
       const ms = t.getTime();
       if (seen.has(ms)) {
-        throw new ConflictException(
-          `Duplicate dispatchedAt within request: ${t.toISOString()}`,
-        );
+        throw new ConflictException(`Duplicate dispatchedAt within request: ${t.toISOString()}`);
       }
       seen.add(ms);
     }
   }
 
-  private async assertNoConflictsWithExisting(
-    tx: Prisma.TransactionClient,
-    truckId: number,
-    times: Date[],
-  ) {
+  private async assertNoConflictsWithExisting(tx: Prisma.TransactionClient, truckId: number, times: Date[]) {
     const existing = await tx.ticket.findFirst({
       where: { truckId, dispatchedAt: { in: times } },
       select: { dispatchedAt: true },
@@ -164,10 +147,7 @@ export class TicketsService {
     }
   }
 
-  private async getNextTicketNumber(
-    tx: Prisma.TransactionClient,
-    siteId: number,
-  ): Promise<number> {
+  private async getNextTicketNumber(tx: Prisma.TransactionClient, siteId: number): Promise<number> {
     const result = await tx.ticket.aggregate({
       where: { siteId },
       _max: { ticketNumber: true },
@@ -176,16 +156,14 @@ export class TicketsService {
     return (result._max.ticketNumber ?? 0) + 1;
   }
 
-  private toResponseShape(
-    ticket: {
-      id: number;
-      ticketNumber: number;
-      material: string;
-      dispatchedAt: Date;
-      truck: { license: string };
-      site: { name: string };
-    },
-  ) {
+  private toResponseShape(ticket: {
+    id: number;
+    ticketNumber: number;
+    material: string;
+    dispatchedAt: Date;
+    truck: { license: string };
+    site: { name: string };
+  }) {
     return {
       id: ticket.id,
       siteName: ticket.site.name,

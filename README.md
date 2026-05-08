@@ -15,8 +15,9 @@ npm run setup      # creates database, runs migrations, seeds 100k sites + 1k tr
 npm run start:dev  # server on http://localhost:3000
 ```
 
-`npm run setup` runs the two steps sequentially — you can also run them individually if needed:
+`npm run setup` handles everything sequentially. The steps can also be run individually:
 ```bash
+npm run env:init                     # copy .env.example → .env (skips if .env already exists)
 npx prisma migrate dev --name init   # create database and apply schema
 npm run db:seed                      # populate sites and trucks
 ```
@@ -43,6 +44,7 @@ npm run test:cov   # with coverage report
 
 - SQLite was chosen so reviewers need no database server to run this locally.
 - The database file (`dev.db`) is excluded from version control and created fresh on first `npm run setup`.
+- Engineering observations — constraints noticed during implementation that were intentionally left out of scope — are documented in [OBSERVATIONS.md](./OBSERVATIONS.md).
 
 ## Key Endpoints
 
