@@ -99,7 +99,7 @@ export class TicketsService {
           truck: { select: { license: true } },
           site: { select: { name: true } },
         },
-        orderBy: { dispatchedAt: 'desc' },
+        orderBy: [{ dispatchedAt: 'desc' }, { id: 'desc' }],
         skip,
         take: limit,
       }),
