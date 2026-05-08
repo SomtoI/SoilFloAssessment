@@ -21,7 +21,6 @@ export function decorateApp(app: INestApplication): void {
     .setTitle('SoilFLO API')
     .setDescription('Construction site material dispatch management API')
     .setVersion('1.0')
-    .addTag('health')
     .addTag('sites')
     .addTag('trucks')
     .addTag('tickets')

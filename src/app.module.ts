@@ -4,14 +4,12 @@ import { PrismaModule } from './prisma/prisma.module';
 import { SitesModule } from './modules/sites/sites.module';
 import { TrucksModule } from './modules/trucks/trucks.module';
 import { TicketsModule } from './modules/tickets/tickets.module';
-import { HealthModule } from './modules/health/health.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     PrismaModule,
-    HealthModule,
     SitesModule,
     TrucksModule,
     TicketsModule,
